@@ -36,7 +36,6 @@ import org.gradle.api.specs.Specs;
 import org.gradle.internal.component.external.model.IvyModuleResolveMetadata;
 import org.gradle.internal.component.external.model.ModuleComponentResolveMetadata;
 import org.gradle.internal.component.external.model.MutableModuleComponentResolveMetadata;
-import org.gradle.internal.component.model.DependencyMetadata;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.internal.resolve.ModuleVersionResolveException;
 import org.gradle.internal.rules.DefaultRuleActionAdapter;
@@ -136,10 +135,8 @@ public class DefaultComponentMetadataHandler implements ComponentMetadataHandler
             updatedMetadata = metadata;
         } else {
             MutableModuleComponentResolveMetadata mutableMetadata = metadata.asMutable();
-            List<DependencyMetadata> mutableDependencies = Lists.newArrayList(metadata.getDependencies());
-            ComponentMetadataDetails details = instantiator.newInstance(ComponentMetadataDetailsAdapter.class, mutableMetadata, mutableDependencies, instantiator, dependencyMetadataNotationParser);
+            ComponentMetadataDetails details = instantiator.newInstance(ComponentMetadataDetailsAdapter.class, mutableMetadata, instantiator, dependencyMetadataNotationParser);
             processAllRules(metadata, details);
-            mutableMetadata.setDependencies(mutableDependencies);
             updatedMetadata = mutableMetadata.asImmutable();
         }
 

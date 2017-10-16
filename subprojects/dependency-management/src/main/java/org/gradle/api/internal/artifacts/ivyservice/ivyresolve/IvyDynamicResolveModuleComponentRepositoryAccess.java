@@ -22,7 +22,6 @@ import org.gradle.internal.component.model.ComponentOverrideMetadata;
 import org.gradle.internal.component.model.DependencyMetadata;
 import org.gradle.internal.resolve.result.BuildableModuleComponentMetaDataResolveResult;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class IvyDynamicResolveModuleComponentRepositoryAccess extends BaseModuleComponentRepositoryAccess {
@@ -63,11 +62,10 @@ class IvyDynamicResolveModuleComponentRepositoryAccess extends BaseModuleCompone
     private void transformDependencies(BuildableModuleComponentMetaDataResolveResult result) {
         ModuleComponentResolveMetadata metadata = result.getMetaData();
         MutableModuleComponentResolveMetadata mutableMetadata = metadata.asMutable();
-        List<DependencyMetadata> transformed = new ArrayList<DependencyMetadata>();
+        List<DependencyMetadata> mutableDependencies = mutableMetadata.getMutableDependencies();
         for (DependencyMetadata dependency : metadata.getDependencies()) {
-            transformed.add(dependency.withRequestedVersion(dependency.getDynamicConstraintVersion()));
+            mutableDependencies.add(dependency.withRequestedVersion(dependency.getDynamicConstraintVersion()));
         }
-        mutableMetadata.setDependencies(transformed);
         result.setMetadata(mutableMetadata.asImmutable());
     }
 }

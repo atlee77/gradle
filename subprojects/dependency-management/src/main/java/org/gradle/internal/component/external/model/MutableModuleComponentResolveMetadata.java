@@ -74,14 +74,15 @@ public interface MutableModuleComponentResolveMetadata {
     ImmutableMap<String, ? extends ConfigurationMetadata> getConfigurations();
 
     /**
-     * Returns the dependency declarations of this component.
+     * Returns a mutable copy of the dependency declarations of this component.
      */
-    List<? extends DependencyMetadata> getDependencies();
+    List<DependencyMetadata> getMutableDependencies();
 
     /**
-     * Replaces the dependencies of this module version.
+     * Returns the dependency declarations of this component. If a mutable copy was requested via
+     * {@link #getMutableDependencies()}, a new immutable list is created based on the changes.
      */
-    void setDependencies(Iterable<? extends DependencyMetadata> dependencies);
+    List<? extends DependencyMetadata> getDependencies();
 
     /**
      * Returns the artifacts to apply to all configurations. Is null when there are no such artifacts.

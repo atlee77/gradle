@@ -208,7 +208,8 @@ abstract class AbstractMutableModuleComponentResolveMetadataTest extends Specifi
         when:
         def dependency1 = dependency("foo", "bar", "1.2", ["runtime"])
         def dependency2 = dependency("foo", "baz", "1.2", ["compile"])
-        metadata.dependencies = [dependency1, dependency2]
+        metadata.mutableDependencies.clear()
+        metadata.mutableDependencies.addAll([dependency1, dependency2])
 
         then:
         metadata.dependencies == [dependency1, dependency2]
@@ -219,7 +220,8 @@ abstract class AbstractMutableModuleComponentResolveMetadataTest extends Specifi
 
         when:
         def copy = immutable.asMutable()
-        copy.dependencies = [dependency1]
+        copy.mutableDependencies.clear()
+        copy.mutableDependencies.add(dependency1)
 
         then:
         def immutable2 = copy.asImmutable()

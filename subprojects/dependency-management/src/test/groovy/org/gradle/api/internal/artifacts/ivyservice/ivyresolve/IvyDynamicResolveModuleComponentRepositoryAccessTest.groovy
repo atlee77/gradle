@@ -52,7 +52,7 @@ class IvyDynamicResolveModuleComponentRepositoryAccessTest extends Specification
         1 * metaData.asMutable() >> mutableMetaData
         1 * metaData.dependencies >> [original]
         1 * original.withRequestedVersion('1.2+') >> transformed
-        1 * mutableMetaData.setDependencies([transformed])
+        1 * mutableMetaData.mutableDependencies >> []
         1 * mutableMetaData.asImmutable() >> updatedMetaData
         1 * result.setMetadata(updatedMetaData)
     }

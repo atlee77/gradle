@@ -17,7 +17,6 @@
 package org.gradle.api.internal.artifacts.ivyservice.clientmodule;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import org.gradle.api.artifacts.ClientModule;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
@@ -64,12 +63,11 @@ public class ClientModuleResolver implements ComponentMetaDataResolver {
     }
 
     private void addClientModuleDependencies(ClientModule clientModule, MutableModuleComponentResolveMetadata clientModuleMetaData) {
-        List<DependencyMetadata> dependencies = Lists.newArrayList();
+        List<DependencyMetadata> mutableDependencies = clientModuleMetaData.getMutableDependencies();
         for (ModuleDependency moduleDependency : clientModule.getDependencies()) {
             DependencyMetadata dependencyMetadata = dependencyDescriptorFactory.createDependencyDescriptor(moduleDependency.getTargetConfiguration(), null, moduleDependency);
-            dependencies.add(dependencyMetadata);
+            mutableDependencies.add(dependencyMetadata);
         }
-        clientModuleMetaData.setDependencies(dependencies);
     }
 
     private void setClientModuleArtifact(MutableModuleComponentResolveMetadata clientModuleMetaData) {

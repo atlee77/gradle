@@ -20,7 +20,6 @@ import org.gradle.api.artifacts.ComponentDependencyMetadataDetails;
 import org.gradle.api.artifacts.ComponentMetadataDetails;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.internal.component.external.model.MutableModuleComponentResolveMetadata;
-import org.gradle.internal.component.model.DependencyMetadata;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.internal.typeconversion.NotationParser;
 
@@ -28,14 +27,12 @@ import java.util.List;
 
 public class ComponentMetadataDetailsAdapter implements ComponentMetadataDetails {
     private final MutableModuleComponentResolveMetadata metadata;
-    private final List<DependencyMetadata> dependenciesMetadata;
     private final Instantiator instantiator;
     private final NotationParser<Object, ComponentDependencyMetadataDetails> dependencyMetadataNotationParser;
     private ComponentDependenciesMetadataDetails componentDependenciesMetadataDetails;
 
-    public ComponentMetadataDetailsAdapter(MutableModuleComponentResolveMetadata metadata, List<DependencyMetadata> dependenciesMetadata, Instantiator instantiator, NotationParser<Object, ComponentDependencyMetadataDetails> dependencyMetadataNotationParser) {
+    public ComponentMetadataDetailsAdapter(MutableModuleComponentResolveMetadata metadata, Instantiator instantiator, NotationParser<Object, ComponentDependencyMetadataDetails> dependencyMetadataNotationParser) {
         this.metadata = metadata;
-        this.dependenciesMetadata = dependenciesMetadata;
         this.instantiator = instantiator;
         this.dependencyMetadataNotationParser = dependencyMetadataNotationParser;
     }
@@ -78,7 +75,7 @@ public class ComponentMetadataDetailsAdapter implements ComponentMetadataDetails
     public ComponentDependenciesMetadataDetails getDependencies() {
         if (componentDependenciesMetadataDetails == null) {
             componentDependenciesMetadataDetails = instantiator.newInstance(ComponentDependenciesMetadataDetailsAdapter.class,
-                dependenciesMetadata, dependencyMetadataNotationParser);
+                metadata.getMutableDependencies(), dependencyMetadataNotationParser);
         }
         return componentDependenciesMetadataDetails;
     }

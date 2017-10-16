@@ -18,6 +18,7 @@ package org.gradle.internal.component.external.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier;
@@ -45,6 +46,7 @@ import static org.gradle.internal.component.model.ComponentResolveMetadata.DEFAU
 
 abstract class AbstractMutableModuleComponentResolveMetadata implements MutableModuleComponentResolveMetadata {
     public static final HashValue EMPTY_CONTENT = HashUtil.createHash("", "MD5");
+    private final List<? extends DependencyMetadata> immutableDependencies;
     private ModuleComponentIdentifier componentId;
     private ModuleVersionIdentifier id;
     private boolean changing;
@@ -52,7 +54,7 @@ abstract class AbstractMutableModuleComponentResolveMetadata implements MutableM
     private String status = "integration";
     private List<String> statusScheme = DEFAULT_STATUS_SCHEME;
     private ModuleSource moduleSource;
-    private List<? extends DependencyMetadata> dependencies;
+    private List<DependencyMetadata> mutableDependencies;
     private HashValue contentHash = EMPTY_CONTENT;
     @Nullable
     private List<? extends ModuleComponentArtifactMetadata> artifactOverrides;
@@ -61,7 +63,7 @@ abstract class AbstractMutableModuleComponentResolveMetadata implements MutableM
     protected AbstractMutableModuleComponentResolveMetadata(ModuleVersionIdentifier id, ModuleComponentIdentifier componentIdentifier, List<? extends DependencyMetadata> dependencies) {
         this.componentId = componentIdentifier;
         this.id = id;
-        this.dependencies = dependencies;
+        this.immutableDependencies = dependencies;
     }
 
     protected AbstractMutableModuleComponentResolveMetadata(ModuleComponentResolveMetadata metadata) {
@@ -73,7 +75,7 @@ abstract class AbstractMutableModuleComponentResolveMetadata implements MutableM
         this.statusScheme = metadata.getStatusScheme();
         this.moduleSource = metadata.getSource();
         this.artifactOverrides = metadata.getArtifactOverrides();
-        this.dependencies = metadata.getDependencies();
+        this.immutableDependencies = metadata.getDependencies();
         this.contentHash = metadata.getContentHash();
     }
 
@@ -106,7 +108,7 @@ abstract class AbstractMutableModuleComponentResolveMetadata implements MutableM
 
     @Override
     public ImmutableMap<String, ? extends ConfigurationMetadata> getConfigurations() {
-        if (configurations == null) {
+        if (configurations == null || mutableDependencies != null) {
             configurations = populateConfigurationsFromDescriptor(getConfigurationDefinitions(), getExcludes());
             if (artifactOverrides != null) {
                 populateArtifactsFromOverrides(artifactOverrides);
@@ -146,6 +148,12 @@ abstract class AbstractMutableModuleComponentResolveMetadata implements MutableM
     private ImmutableMap<String, DefaultConfigurationMetadata> populateConfigurationsFromDescriptor(Map<String, Configuration> configurationDefinitions, List<Exclude> excludes) {
         Set<String> configurationsNames = configurationDefinitions.keySet();
         Map<String, DefaultConfigurationMetadata> configurations = new HashMap<String, DefaultConfigurationMetadata>(configurationsNames.size());
+        List<? extends DependencyMetadata> dependencies;
+        if (this.mutableDependencies == null) {
+            dependencies = this.immutableDependencies;
+        } else {
+            dependencies = this.mutableDependencies;
+        }
         for (String configName : configurationsNames) {
             DefaultConfigurationMetadata configuration = populateConfigurationFromDescriptor(configName, configurationDefinitions, configurations, excludes);
             configuration.populateDependencies(dependencies);
@@ -272,12 +280,17 @@ abstract class AbstractMutableModuleComponentResolveMetadata implements MutableM
 
     @Override
     public List<? extends DependencyMetadata> getDependencies() {
-        return dependencies;
+        if (mutableDependencies == null) {
+            return immutableDependencies;
+        }
+        return ImmutableList.copyOf(mutableDependencies);
     }
 
     @Override
-    public void setDependencies(Iterable<? extends DependencyMetadata> dependencies) {
-        this.dependencies = ImmutableList.copyOf(dependencies);
-        resetConfigurations();
+    public List<DependencyMetadata> getMutableDependencies() {
+        if (mutableDependencies == null) {
+            mutableDependencies = Lists.newArrayList(immutableDependencies);
+        }
+        return mutableDependencies;
     }
 }
